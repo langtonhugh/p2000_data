@@ -18,8 +18,14 @@ theme_set(theme_bw())
 # Load in the p2000 data. SL has sent this to the NIPV.
 p2000_df <- read_csv("data/p2000_demo_data.csv")
 
-# Load in the GMS data. For now, this is fake data created by SL.
+# Load in the GMS data. For now, this is fake data created by SL in the
+# p2000_brandweer_create_data_v2.R script. 
 gms_df   <- read_csv("data/fake_gms_demo_data.csv")
+
+# You can proceed with the fake data to see the demo comparison, but later on,
+# replace the above gms_df with the *real dispatch-level GMS data*. If you 
+# wrangle the real data to mimic the structure of this fake data, the rest of
+# the script should run without any further edits.
 
 # We need a day-date to filter the gms data.
 p2000_df <- p2000_df %>% 
