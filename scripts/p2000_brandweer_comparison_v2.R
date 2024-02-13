@@ -2,6 +2,9 @@
 # Handling and visuals for Brandweer comparison.
 # ==============================================
 
+# To get the latest changes, please run the p2000_brandweer_create_data_v2.R
+# script first! Then proceed with this script.
+
 # Load packages.
 library(dplyr)
 library(readr)
@@ -15,7 +18,7 @@ options(scipen=9999999)
 # Set ggplot2 theme.
 theme_set(theme_bw())
 
-# Load in the p2000 data. SL has sent this to the NIPV.
+# Load in the p2000 data. Created by SL using p2000_brandweer_create_data_v2.R.
 p2000_df <- read_csv("data/p2000_demo_data.csv")
 
 # Load in the GMS data. For now, this is fake data created by SL in the
@@ -23,20 +26,21 @@ p2000_df <- read_csv("data/p2000_demo_data.csv")
 gms_df   <- read_csv("data/fake_gms_demo_data.csv")
 
 # You can proceed with the fake data to see the demo comparison, but later on,
-# replace the above gms_df with the *real dispatch-level GMS data*. If you 
+# replace the above gms_df with the *real dispatch-level GMS data*. The data
+# should be inzet-level data for prio1 or prio2 incidents. If you 
 # wrangle the real data to mimic the structure of this fake data, the rest of
 # the script should run without any further edits.
 
 # We need a day-date to filter the gms data.
 p2000_df <- p2000_df %>% 
-  mutate(full_date = date(timestamp))
+  mutate(full_date = date(brand_melding_timestamp))
 
 # Filter the GMS data according to days present in the p2000 data. In this
 # demo, the fake GMS data is just a random sample of the p2000 data, so the
 # filter probably does nothing. The real thing will drop much more though
 # (as it should!).
 gms_sub_df <- gms_df %>% 
-  mutate(full_date = date(timestamp )) %>% 
+  mutate(full_date = date(brand_melding_timestamp)) %>% 
   filter(full_date %in% unique(p2000_df$full_date))
 
 # Bind them together to make handling easier.
@@ -47,7 +51,7 @@ rm(gms_df, gms_sub_df, p2000_df)
 
 # Create (potentially) useful variables.
 clean_df <- complete_df %>% 
-  mutate(date_time_r  = round_date(timestamp, "hour"),
+  mutate(date_time_r  = round_date(brand_melding_timestamp, "hour"),
          hour_of_day  = hour(date_time_r),
          week_day     = wday(full_date , abbr = FALSE, label = TRUE),
          hour_of_week = hour_of_day + (24 * (wday(full_date, week_start = 1)-1)), # Create an hour of the week (0-167 hours).
@@ -81,7 +85,7 @@ ggsave(filename = "visuals/hourly_counts_study_period.png",
 # Check regional frequencies.
 clean_df %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = region, fill = data_source), position = "dodge") + 
+  geom_bar(mapping = aes(x = regio, fill = data_source), position = "dodge") + 
   coord_flip() +
   theme(legend.position = "bottom")
 
@@ -92,8 +96,8 @@ ggsave(filename = "visuals/regional_frequencies.png",
 # Check priority frequencies by region.
 clean_df %>% 
   ggplot() +
-  geom_bar(mapping = aes(x = priority, fill = data_source), position = "dodge") +
-  facet_wrap(~region) +
+  geom_bar(mapping = aes(x = prio, fill = data_source), position = "dodge") +
+  facet_wrap(~regio) +
   theme(legend.position = "bottom")
 
 # Save.
@@ -102,14 +106,14 @@ ggsave(filename = "visuals/priority_frequencies_region.png",
 
 # Regional frequency counts.
 regional_hour_freq_df <- clean_df %>%
-  group_by(region, data_source, hour_of_day) %>%
+  group_by(regio, data_source, hour_of_day) %>%
   tally() %>% 
   ungroup()
 
 # Plot.
 ggplot(data = regional_hour_freq_df) +
   geom_line(mapping = aes(x = hour_of_day, y = n, group = data_source, colour = data_source)) +
-  facet_wrap(~region, scales = "free") +
+  facet_wrap(~regio, scales = "free") +
   labs(colour = NULL) +
   theme(
     legend.position = "bottom"

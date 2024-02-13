@@ -40,13 +40,16 @@ source_clean_df <- mydata %>%
 
 # Create a complete date variable to mimic GMS data.
 source_clean_df <- source_clean_df %>% 
-  mutate(timestamp = dmy_hms(paste(dates, times)))
+  mutate(timestamp = dmy_hms(paste(dates, times))) %>% 
+  drop_na(timestamp) # only 40 didn't parse.
 
 # Clean the data in a way which kind of mimics GMS data for fire only, but we 
 # also keep the info variable so NIPV see the raw info.
 source_gms_struc_df <- source_clean_df %>% 
-  filter(priority %in% c("P1", "P2"),   
-         service  == "Fire") %>% 
+  filter(service  == "Fire") %>% 
+  mutate(priority = if_else(str_detect(priority, "1"), "prio1", priority),
+         priority = if_else(str_detect(priority, "2"), "prio2", priority)) %>% 
+  filter(priority %in% c("prio1", "prio2")) %>% 
   select(code, timestamp, sign, info, service, priority)
 
 # Load in the CAP code data.
@@ -76,11 +79,20 @@ sum(is.na(fire_clean_df$region)) / nrow(fire_clean_df) # 25%
 fire_no_miss_clean_df <- fire_clean_df %>%
   filter(!is.na(region) )
 
+# Select only variables that are in inzet-level GMS data and rename to
+# something similar.
+fire_no_miss_clean_df <- fire_no_miss_clean_df %>% 
+  select(code, timestamp, service, priority, region, data_source) %>% 
+  rename(roep_nummer             = code,
+         brand_melding_timestamp = timestamp,
+         dienst                  = service,
+         prio                    = priority,
+         regio                   = region)
+
 # Mimic this data for 'fake' real GMS data.
 fake_gms_df <- fire_no_miss_clean_df %>% 
   slice_sample(prop = 0.75, replace = FALSE) %>% 
-  mutate(info = "No info",
-         data_source = "fake gms") 
+  mutate(data_source = "fake gms")
   
 # Save each data separately.
 write_csv(x = fire_no_miss_clean_df, file = "data/p2000_demo_data.csv")
