@@ -1,3 +1,8 @@
+# Data
+data/*.csv
+data/*.zip
+data/*.rds
+
 # History files
 .Rhistory
 .Rapp.history
