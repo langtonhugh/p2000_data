@@ -27,7 +27,7 @@ gms_df   <- read_csv("data/fake_gms_demo_data.csv")
 
 # You can proceed with the fake data to see the demo comparison, but later on,
 # replace the above gms_df with the *real dispatch-level GMS data*. The data
-# should be inzet-level data for prio1 or prio2 incidents. If you 
+# should be inzet-level data for prio1 and prio2 incidents. If you 
 # wrangle the real data to mimic the structure of this fake data, the rest of
 # the script should run without any further edits.
 
