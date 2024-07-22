@@ -22,6 +22,13 @@ mydata_3 <- readRDS("data/new_scrapes_20230208_20231009.rds")
 # Bind rows.
 mydata <- bind_rows(mydata_1, mydata_2, mydata_3)
 
+# Save raw data if needed in different format. NB: for now
+# we save a sample for exploration.
+set.seed(1612)
+mydata %>% 
+  sample_n(size = 1000) %>% 
+  write_csv(file = "data/all_sample_scrapes.csv")
+
 # Remove old to save memory if needed.
 rm(mydata_1, mydata_2, mydata_3)
 
