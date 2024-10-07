@@ -19,7 +19,8 @@ source_clean_df <- mydata %>%
                              str_detect(string = info, pattern = "MKA"       ) ~ "Ambulance"),
          priority = str_remove_all(string = str_extract_all(
            info, "^.{3}"), pattern = " ")
-         ) 
+         ) %>% 
+  drop_na(service)
 
 # Create a complete date variable to mimic GMS data.
 source_clean_df <- source_clean_df %>% 
