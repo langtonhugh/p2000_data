@@ -3,6 +3,8 @@ data/*.csv
 data/*.zip
 data/*.rds
 
+!data/p2000_july2023.csv
+
 # History files
 .Rhistory
 .Rapp.history
